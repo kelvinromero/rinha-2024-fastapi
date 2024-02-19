@@ -23,20 +23,23 @@ async def get_session():
 
 @app.post("/clientes/{cliente_id}/transacoes", response_model=schemas.ClienteBase)
 async def post_transacao(cliente_id: int, transacao: schemas.TransactionBase, session: Session = Depends(get_session)):
-    cliente = session.get(Cliente, cliente_id)
+    cliente = session.query(Cliente).filter_by(id=cliente_id).with_for_update().one()
 
     if not cliente:
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
 
-    try:
-        session.add(
-            Transacao(**transacao.model_dump(),
-                        cliente_id=cliente_id)
-        )
-        session.commit()
-        session.refresh(cliente)
-    except IntegrityError:
-        raise HTTPException(status_code=422, detail="Limite insuficiente")
+    if transacao.tipo == "d":
+        if cliente.saldo - transacao.valor < -cliente.limite:
+            raise HTTPException(status_code=422, detail="Saldo insuficiente")
+        cliente.saldo -= transacao.valor
+    else:
+        cliente.saldo += transacao.valor
+    session.add(
+        Transacao(**transacao.model_dump(),
+                  cliente_id=cliente_id)
+    )
+    session.commit()
+    session.refresh(cliente)
 
     return {
         "limite": cliente.limite,
