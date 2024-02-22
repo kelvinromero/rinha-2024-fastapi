@@ -1,11 +1,11 @@
 FROM python:3.11-slim-bookworm
 
-WORKDIR /src
+WORKDIR /app
 
-COPY .setup/requirements.txt /src/requirements.txt
+COPY requirements.txt /app/requirements.txt
 
-RUN pip install --no-cache-dir -r /src/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
-COPY src/ .
+COPY src/ /app/src
 
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "--reload", "src.main:app", "--host", "0.0.0.0", "--port", "80"]

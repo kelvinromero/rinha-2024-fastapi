@@ -4,11 +4,13 @@ services:
   api01: &api01
     container_name: api01
     hostname: api01
-    image: kelvinromero/rinha-2024-q1:nginx-fastapi-postgres
+    build:
+      context: .
+      dockerfile: Dockerfile
     depends_on:
       - db
     volumes:
-      - ./:/src
+      - ./src:/app/src
     ports:
       - "81:80"
     deploy:

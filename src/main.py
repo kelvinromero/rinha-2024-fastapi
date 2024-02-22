@@ -3,12 +3,11 @@ import time
 from fastapi import FastAPI, HTTPException
 from fastapi.params import Depends
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from . import schemas
 from .database import SessionLocal
 from .models import Cliente, Transacao
+from .schemas import ClienteBase, TransactionBase, Transaction
 
 app = FastAPI()
 
@@ -21,8 +20,8 @@ async def get_session():
         session.close()
 
 
-@app.post("/clientes/{cliente_id}/transacoes", response_model=schemas.ClienteBase)
-async def post_transacao(cliente_id: int, transacao: schemas.TransactionBase, session: Session = Depends(get_session)):
+@app.post("/clientes/{cliente_id}/transacoes", response_model=ClienteBase)
+async def post_transacao(cliente_id: int, transacao: TransactionBase, session: Session = Depends(get_session)):
     cliente = session.query(Cliente).\
         filter_by(id=cliente_id).\
         with_for_update().\
@@ -71,6 +70,6 @@ async def get_extrato(id: int, session: Session = Depends(get_session)):
             "limite": client.limite
         },
         "ultimas_transacoes": [
-            schemas.Transaction.model_validate(t) for t in transactions.scalars()
+            Transaction.model_validate(t) for t in transactions.scalars()
         ]
     }
