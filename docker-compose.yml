@@ -4,9 +4,7 @@ services:
   api01: &api01
     container_name: api01
     hostname: api01
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: kelvinromero/rinha-2024-q1:nginx-fastapi-postgres
     depends_on:
       - db
     volumes:
@@ -17,7 +15,7 @@ services:
       resources:
         limits:
           cpus: "0.45"
-          memory: "180MB"
+          memory: "170MB"
 
   api02:
     <<: *api01
@@ -65,7 +63,7 @@ services:
       resources:
         limits:
           cpus: "0.1"
-          memory: "40MB"
+          memory: "60MB"
 
 networks:
   default:
